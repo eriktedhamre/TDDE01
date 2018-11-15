@@ -16,15 +16,25 @@ predict.condition.0.5 <- ifelse(predict > 0.5, 1, 0)
 # Confusion matrix
 table(test$Spam, predict.condition.0.5)
 
+#   0   1
+# 0 791 146
+# 1  97 336
+
 # Y_hat = 1 if P(Y = 1|X) > 0.9, else Y_hat = 0
 predict.condition.0.9 <- ifelse(predict > 0.9, 1, 0)
 # Confusion matrix
 table(test$Spam, predict.condition.0.9)
 
+#   0   1
+# 0 936   1
+# 1 427   6
+
 # KKNN with K = 30
 kknn.response.K30 <- kknn(as.factor(Spam)~., train, test, k = 30)
 # Confusion matrix
 table(test$Spam, kknn.response.K30$fitted.values)
+table(train$Spam, kknn.response.K30$fitted.values)
+#  Test
 #    0   1
 # 0 672 265
 # 1 187 246
