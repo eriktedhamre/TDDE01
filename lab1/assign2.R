@@ -4,10 +4,10 @@ data <- as.matrix(data.frame(read.csv("machines.csv")))
 plot(data)
 
 llhood <- function(x, theta){
-  return(sum(log(theta*exp(-theta*x)))/length(x))
+  return (log(prod(theta*exp(-theta*x))))
 } 
 
-theta.seq = seq(from = 0.5, to = 1.5, by = 0.01)
+theta.seq = seq(from = 0, to = 4, by = 0.001)
 
 llhood.for.thetas <- function(theta.vector, data.vector ){
   res <- double()
@@ -19,8 +19,35 @@ llhood.for.thetas <- function(theta.vector, data.vector ){
 
 thetas.all.data <- llhood.for.thetas(theta.seq, data)
 theta.6.datapoints <- llhood.for.thetas(theta.seq, c(data[1:6]))
-plot(theta.seq, thetas.all.data, xlim = range(0.5,1.5), ylim = range(-2,1 ))
-lines(theta.seq, theta.6.datapoints)
-theta.seq[which.max(thetas)]
+plot(theta.seq, thetas.all.data, type = 'l', xlim = range(0,4), ylim = range(-300,30 ))
+lines(theta.seq, theta.6.datapoints, col = "red")
+theta.seq[which.max(thetas.all.data)]
 
 # 1.13 Erik probably smaller interval in theta-vector
+
+# Bayesian
+
+prior <- function(lambda, theta){
+  return (log(theta*exp(-theta*lambda)))
+}
+
+
+llhood.bayesian <- function(theta.vector, data.vector ){
+  res <- double()
+  for (value in theta.vector) {
+    res <- append(res, (llhood(data.vector, value) + prior(10, value)))
+  }
+  return(res)
+}
+
+thetas.bayesian <- llhood.bayesian(theta.seq, data)
+theta.seq[which.max(thetas.bayesian)]
+lines(theta.seq, thetas.bayesian, col = "blue")
+
+
+# Lambda 1.26
+
+generated.data = rexp(50, rate = 1.126)
+hist(data)
+hist(generated.data)
+
