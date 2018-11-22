@@ -23,7 +23,7 @@ plot(theta.seq, thetas.all.data, type = 'l', xlim = range(0,4), ylim = range(-30
 lines(theta.seq, theta.6.datapoints, col = "red")
 theta.seq[which.max(thetas.all.data)]
 
-# 1.13 Erik probably smaller interval in theta-vector
+# 1.126 Erik probably smaller interval in theta-vector
 
 # Bayesian
 
@@ -45,7 +45,7 @@ theta.seq[which.max(thetas.bayesian)]
 lines(theta.seq, thetas.bayesian, col = "blue")
 
 
-# Lambda 1.26
+# Lambda 0.931
 
 generated.data = rexp(50, rate = 1.126)
 hist(data)
