@@ -21,7 +21,7 @@ thetas.all.data <- llhood.for.thetas(theta.seq, data)
 theta.6.datapoints <- llhood.for.thetas(theta.seq, c(data[1:6]))
 plot(theta.seq, thetas.all.data, type = 'l', xlim = range(0,4), ylim = range(-300,30 ))
 lines(theta.seq, theta.6.datapoints, col = "red")
-theta.seq[which.max(thetas.all.data)]
+theta.seq[which.max(theta.6.datapoints)]
 
 # 1.126 Erik probably smaller interval in theta-vector
 

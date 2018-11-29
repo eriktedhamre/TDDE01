@@ -43,7 +43,7 @@ table(train$Spam, kknn.response.K30$fitted.values)
 kknn.response.K1 <- kknn(as.factor(Spam)~., train, test, k = 1)
 # Confusion matrix
 table(test$Spam, kknn.response.K1$fitted.values)
-
+table(train$Spam, kknn.response.K1$fitted.values)
 #    0   1
 # 0 640 297
 # 1 177 256

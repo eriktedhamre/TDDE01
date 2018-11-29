@@ -39,8 +39,8 @@ coef(step.model)
 ## 4.5
 data.fat <- subset(data, select = -c(Sample, Protein, Moisture))
 set.seed(12345)
-covariates <- scale(data.fat.no.header[,1:100])
-response <- scale(data.fat.no.header[,101])
+covariates <- scale(data.fat[,1:100])
+response <- scale(data.fat[,101])
 
 model.rr <- glmnet(as.matrix(covariates), response, alpha = 0)
 plot(model.rr, xvar="lambda", label=TRUE)
@@ -48,17 +48,18 @@ plot(model.rr, xvar="lambda", label=TRUE)
 ## 4.6
 data.fat <- subset(data, select = -c(Sample, Protein, Moisture))
 set.seed(12345)
-covariates <- scale(data.fat.no.header[,1:100])
-response <- scale(data.fat.no.header[,101])
+covariates <- scale(data[,1:100])
+response <- scale(data.fat[,101])
 model.lasso <- glmnet(as.matrix(covariates), response , alpha = 1)
 plot(model.lasso, xvar="lambda")
 
 ## 4.7
 data.fat <- subset(data, select = -c(Sample, Protein, Moisture))
 set.seed(12345)
-covariates <- scale(data.fat.no.header[,1:100])
-response <- scale(data.fat.no.header[,101])
-cv.lasso <- cv.glmnet(as.matrix(covariates), response , alpha = 1)
+covariates <- scale(data.fat[,1:100])
+response <- scale(data.fat[,101])
+cv.lasso <- cv.glmnet(as.matrix(covariates), response , alpha = 1, lambda = seq(0, 1, 0.001))
 plot(cv.lasso)
+cv.lasso$lambda
 (best.lambda <- cv.lasso$lambda.min)
 
