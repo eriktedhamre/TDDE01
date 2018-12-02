@@ -6,6 +6,7 @@ n <- dim(data)[1]
 id <- sample(1:n, floor(n*0.5))
 train <- data[id,]
 test <- data[-id,]
+plot(data$Moisture, data$Protein, xlab = "Moisture", ylab = "Protein")
 
 
 mse <- function(actual, predicted) {return (mean((actual$Moisture - predicted)^2))}
@@ -23,15 +24,19 @@ create.mse.vector <-function(data.all, data.test, data.train, exponentials){
 
 i.vector <- seq(1, 6, 1)
 mse.vector <- create.mse.vector(data.all = data, data.test = test, data.train = train, exponentials = i.vector)
-barplot(mse.vector, ylim = c(32, 35), ylab = "MSE", xlab = "TR = training data, TE = test data, # = polynomial degree",
-        names.arg = c( "TR 1", "TE 1", "TR 2", "TE 2", "TR 3", "TE 3", "TR 4", "TE 4", "TR 5", "TE 5", "TR 6", "TE 6"))
-
-
+mse.train <- mse.vector[c(TRUE, FALSE)]
+mse.test <- mse.vector[c(FALSE, TRUE)]
+ggplot() + 
+  geom_line(aes(x = seq(1, 6, 1), y = mse.train), color = "red") +
+  geom_line(aes(x = seq(1, 6, 1), y = mse.test), color = "blue") +
+  labs() +
+  xlab('Polynomial degree') +
+  ylab('MSE')
 ## 4.4
 data.fat <- subset(data, select = -c(Sample, Protein, Moisture))
 set.seed(12345)
 full.model <- lm(Fat ~., data = data.fat)
-step.model <- stepAIC(full.model, direction = "both", trace = FALSE)
+step.model <- stepAIC(full.model, direction = "backward", trace = FALSE)
 coef(step.model)
 
 #Selected all of them??
