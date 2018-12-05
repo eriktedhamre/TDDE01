@@ -1,4 +1,6 @@
-# 2.1
+library("e1071")
+library("MASS")
+library("tree")
 setwd("~/TDDE01/lab2")
 data.credit <- data.frame(read.csv("creditscoring.csv"))
 n=dim(data.credit)[1]
@@ -77,9 +79,21 @@ for (pi.value in pi.vector) {
   tree.table <- table(test$good_bad, tree.predict.pi)
   bayes.table <- table(test$good_bad, bayes.predict.pi)
   # is.finite(tree.table[5])
+  # Don't think Rolf's solution works since you need to know which of the columns 
+  # are missing, so that you set the correct values to zero, since both
+  # can be missing
+  #TP.tree <-ifelse(tree.table[])
+  #TN.tree
+  #FP.tree
+  #FN.tree
+  if(length(tree.table) != 4){
+    
+  }
   
+  if(length(bayes.table) != 4){
+    
+  }
 }
-
 
 
 
