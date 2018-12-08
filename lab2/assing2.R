@@ -1,6 +1,7 @@
 library("e1071")
 library("MASS")
 library("tree")
+library("ggplot2")
 setwd("~/TDDE01/lab2")
 data.credit <- data.frame(read.csv("creditscoring.csv"))
 n=dim(data.credit)[1]
@@ -66,34 +67,35 @@ table(Yfit.bayes.test, test$good_bad)
 
 # Tree is a bit better, very nice sir
 
-Yfit.tree.test=predict(finalTree, newdata=test)
-pi.vector <- seq(0.05, 0.3, 0.05)
-
-tpr.vector = double()
-fpr.vector = double()
-tree.predict <- predict(finalTree, newdata = test)
-bayes.predict <- predict(fit.bayes, newdata = test, type = "raw")
-for (pi.value in pi.vector) {
-  tree.predict.pi <- ifelse(tree.predict[,2] > pi.value, "good", "bad")
-  bayes.predict.pi <- ifelse(bayes.predict[,2] > pi.value, "good", "bad")
-  tree.table <- table(test$good_bad, tree.predict.pi)
-  bayes.table <- table(test$good_bad, bayes.predict.pi)
-  # is.finite(tree.table[5])
-  # Don't think Rolf's solution works since you need to know which of the columns 
-  # are missing, so that you set the correct values to zero, since both
-  # can be missing
-  #TP.tree <-ifelse(tree.table[])
-  #TN.tree
-  #FP.tree
-  #FN.tree
-  if(length(tree.table) != 4){
-    
-  }
+createROCmatrix <- function(pred, pi.vector){
+  tpr.vector = numeric()
+  fpr.vector = double()
   
-  if(length(bayes.table) != 4){
+  for (pi.value in pi.vector) {
+    predict.pi <- ifelse(pred[,2] > pi.value, "good", "bad")
+    TP <- length(which(predict.pi == "good" & test$good_bad == "good"))
+    TN <- length(which(predict.pi == "bad" & test$good_bad == "bad"))
+    FP <- length(which(predict.pi == "good" & test$good_bad == "bad"))
+    FN <- length(which(predict.pi == "bad" & test$good_bad == "good"))
     
+    tpr.vector <- append(tpr.vector, TP/(TP+FN))
+    fpr.vector <- append(fpr.vector, FP/(FP+TN))
   }
+  return(data.frame(pi.vector, tpr.vector, fpr.vector))
 }
 
+Yfit.tree.test=predict(finalTree, newdata=test)
+pi.vector <- seq(0.05, 0.95, 0.05)
 
+tree.predict <- predict(finalTree, newdata = test)
+bayes.predict <- predict(fit.bayes, newdata = test, type = "raw")
+
+tree.ROC.matrix <- createROCmatrix(tree.predict, pi.vector)
+bayes.ROC.matrix <- createROCmatrix(bayes.predict, pi.vector)
+
+ggplot(data = NULL, aes(col = classifier)) +
+  geom_point(data = tree.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Tree")) + 
+  geom_line(data = tree.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Tree")) +
+  geom_point(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) + 
+  geom_line(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) 
 

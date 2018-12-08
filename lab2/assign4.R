@@ -1,0 +1,12 @@
+library("ggplot2")
+setwd("~/TDDE01/lab2")
+data <- data.frame(read.csv2("NIRSpectra.csv"))
+data.features <- subset(data, select = -c(Viscosity))
+pca.fit <-prcomp(x = data.features, center = TRUE, scale. = TRUE)
+axes <- as.data.frame(pca.fit$rotation[,1:2])
+print(pca.fit)
+plot(pca.fit, type="l")
+# Proportion of variance for PC1 & PC2 = 0.99614
+qplot(x=axes$PC1, y=axes$PC2, data=pca.fit$scores)
+plot(pca.fit$rotation)
+plot(pca.fit$x[,1], pca.fit$x[,2])

@@ -1,3 +1,5 @@
+library("ggplot2")
+library("MASS")
 # 1.1
 setwd("~/TDDE01/lab2")
 data <- data.frame(read.csv("australian-crabs.csv"))
@@ -17,9 +19,8 @@ mcr.0.9 <- mean(lda.predict2$class != data$sex)
 #1.4
 glm.model <- glm(as.factor(sex) ~ CL + RW, family = binomial, data = data)
 glm.predict <- predict(glm.model, data, type = 'response')
-mcr.glm <- mean(glm.predict != data$sex)
 glm.predict.0.5 <- ifelse(glm.predict > 0.5, "Male", "Female")
-table(data$sex, glm.predict.0.5)
+mcr.glm <- mean(glm.predict.0.5 != data$sex)
 glm.slope <- coef(glm.model)[2]/(-coef(glm.model)[3])
 glm.intercept <- coef(glm.model)[1]/(-coef(glm.model)[3])
 ggplot.0.5 + geom_abline(slope = glm.slope, intercept = glm.intercept)
