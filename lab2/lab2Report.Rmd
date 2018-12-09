@@ -83,29 +83,123 @@ id3=setdiff(id1,id2)
 test=data.credit[id3,]
 ```
 
-```{r 2.2.1}
+```{r echo = FALSE}
 tree.fit.dev <- tree(good_bad ~., data = train, split = "deviance")
 tree.fit.gini <- tree(good_bad ~., data = train, split = "gini")
 ```
 The models used in calculating the following confusion matrices.
 
-```{r 2.2.2}
+```{r echo = FALSE}
 pred.dev.train <- predict(tree.fit.dev, newdata = train, type="class")
 table(train$good_bad, pred.dev.train)
 ```
-
-```{r 2.2.3}
+Confusion matrix for deviance on train data.
+```{r echo = FALSE}
 pred.dev.test <- predict(tree.fit.dev, newdata = test, type="class")
 table(test$good_bad, pred.dev.test)
 ```
-
-```{r 2.2.4}
+Confusion matrix for deviance on test data.
+```{r echo = FALSE}
 pred.gini.train <- predict(tree.fit.gini, newdata = train, type="class")
 table(train$good_bad, pred.gini.train)
 ```
-
-```{r 2.2.5}
+Confusion matrix for gini on train data.
+```{r echo = FALSE}
 pred.gini.test <- predict(tree.fit.gini, newdata = test, type="class")
 table(test$good_bad, pred.gini.test)
 ```
+Confusion matrix for gini on test data.
+The confusion matrix is the best for deviance compared to gini based on the number of correct predictions for the test data.
 
+## Assignment 2.3
+```{r echo = FALSE}
+fit=tree(good_bad~., data=train)
+set.seed(12345)
+max.size <- 15
+trainScore=rep(0,max.size)
+testScore=rep(0,max.size)
+for(i in 2:max.size) {
+  prunedTree=prune.tree(fit,best=i)
+  pred=predict(prunedTree, newdata=valid, type="tree")
+  trainScore[i]=deviance(prunedTree)
+  testScore[i]=deviance(pred)
+}
+plot(2:max.size, trainScore[2:max.size], type="b", col="red", ylim=c(250,400), xlab = "Number of leaves", ylab = "Score")
+points(2:max.size, testScore[2:max.size], type="b", col="blue")
+```
+
+Looking at the graph we see a minimum value for 4.
+
+```{r echo = FALSE}
+finalTree=prune.tree(fit, best=4)
+plot(finalTree)
+```
+
+Something about the tree structure. The optimal depth of the tree is three which can be seen in the graph.
+
+```{r echo = FALSE}
+Yfit=predict(finalTree, newdata=valid, type = "class")
+table(valid$good_bad,Yfit)
+```
+Confusion matrix for the validation data for the tree data
+
+```{r echo = FALSE}
+summary(finalTree)
+```
+As seen above the variables used in the tree are "savings", "duration" and "history".
+```{r echo = FALSE}
+fit.bayes=naiveBayes(good_bad~., data=train)
+Yfit.bayes.train=predict(fit.bayes, newdata=train)
+Yfit.bayes.test=predict(fit.bayes, newdata=test)
+table(Yfit.bayes.train, train$good_bad)
+table(Yfit.bayes.test, test$good_bad)
+```
+
+The tree prediction is a bit better than the bayesian prediction.
+
+```{r echo = FALSE}
+set.seed(12345)
+
+createROCmatrix <- function(pred, pi.vector){
+  tpr.vector = numeric()
+  fpr.vector = double()
+  
+  for (pi.value in pi.vector) {
+    predict.pi <- ifelse(pred[,2] > pi.value, "good", "bad")
+    TP <- length(which(predict.pi == "good" & test$good_bad == "good"))
+    TN <- length(which(predict.pi == "bad" & test$good_bad == "bad"))
+    FP <- length(which(predict.pi == "good" & test$good_bad == "bad"))
+    FN <- length(which(predict.pi == "bad" & test$good_bad == "good"))
+    
+    tpr.vector <- append(tpr.vector, TP/(TP+FN))
+    fpr.vector <- append(fpr.vector, FP/(FP+TN))
+  }
+  return(data.frame(pi.vector, tpr.vector, fpr.vector))
+}
+
+Yfit.tree.test=predict(finalTree, newdata=test)
+pi.vector <- seq(0.05, 0.95, 0.05)
+
+tree.predict <- predict(finalTree, newdata = test)
+fit.bayes <- naiveBayes(good_bad~., data=train)
+bayes.predict <- predict(fit.bayes, newdata = test, type = "raw")
+
+tree.ROC.matrix <- createROCmatrix(tree.predict, pi.vector)
+bayes.ROC.matrix <- createROCmatrix(bayes.predict, pi.vector)
+
+ggplot(data = NULL, aes(col = classifier), xlab = "FPR", ylab = "TPR") +
+  geom_point(data = tree.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Tree")) + 
+  geom_line(data = tree.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Tree")) +
+  geom_point(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) + 
+  geom_line(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) 
+
+```
+Graph of radius of convergence
+
+
+```{r echo = FALSE}
+loss_matrix <- matrix(data = c(0,1,10,0), nrow = 2, ncol = 2)
+bayes.loss.predict <- ifelse(bayes.predict[,2]/bayes.predict[,1] > loss_matrix[3]/loss_matrix[2], "good", "bad")
+table(test$good_bad, bayes.loss.predict)
+```
+Weird table probably incorrect.

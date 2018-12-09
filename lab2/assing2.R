@@ -33,7 +33,6 @@ table(test$good_bad, pred.gini.test)
 
 #Deviance provides better result based on the diagonal of the confusion matrices
 
-
 fit=tree(good_bad~., data=train)
 set.seed(12345)
 max.size <- 15
@@ -51,6 +50,7 @@ points(2:max.size, testScore[2:max.size], type="b", col="blue")
 # 4 is very nice thank you sir
 
 finalTree=prune.tree(fit, best=4)
+plot(finalTree)
 # Depth 3 from plot(finalTree)
 Yfit=predict(finalTree, newdata=valid, type = "class")
 table(valid$good_bad,Yfit)
@@ -58,14 +58,11 @@ mcr.tree <- mean(valid$good_bad != Yfit)
 #Variables actually used in tree construction:
 #[1] "savings"  "duration" "history" 
 
-
 fit.bayes=naiveBayes(good_bad~., data=train)
 Yfit.bayes.train=predict(fit.bayes, newdata=train)
 Yfit.bayes.test=predict(fit.bayes, newdata=test)
 table(Yfit.bayes.train, train$good_bad)
 table(Yfit.bayes.test, test$good_bad)
-
-# Tree is a bit better, very nice sir
 
 createROCmatrix <- function(pred, pi.vector){
   tpr.vector = numeric()
@@ -99,3 +96,6 @@ ggplot(data = NULL, aes(col = classifier)) +
   geom_point(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) + 
   geom_line(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) 
 
+loss_matrix <- matrix(data = c(0,1,10,0), nrow = 2, ncol = 2)
+bayes.loss.predict <- ifelse(bayes.predict[,2]/bayes.predict[,1] > loss_matrix[3]/loss_matrix[2], "good", "bad")
+table(test$good_bad, bayes.loss.predict)
