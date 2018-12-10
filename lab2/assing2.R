@@ -20,18 +20,19 @@ tree.fit.dev <- tree(good_bad ~., data = train, split = "deviance")
 tree.fit.gini <- tree(good_bad ~., data = train, split = "gini")
 
 pred.dev.train <- predict(tree.fit.dev, newdata = train, type="class")
-table(train$good_bad, pred.dev.train)
+mean(train$good_bad != pred.dev.train)
 
 pred.dev.test <- predict(tree.fit.dev, newdata = test, type="class")
-table(test$good_bad, pred.dev.test)
+mean(test$good_bad != pred.dev.test)
 
 pred.gini.train <- predict(tree.fit.gini, newdata = train, type="class")
-table(train$good_bad, pred.gini.train)
+mean(train$good_bad != pred.gini.train)
 
 pred.gini.test <- predict(tree.fit.gini, newdata = test, type="class")
-table(test$good_bad, pred.gini.test)
+mean(test$good_bad != pred.gini.test)
 
 #Deviance provides better result based on the diagonal of the confusion matrices
+
 
 fit=tree(good_bad~., data=train)
 set.seed(12345)
@@ -44,25 +45,27 @@ for(i in 2:max.size) {
   trainScore[i]=deviance(prunedTree)
   testScore[i]=deviance(pred)
 }
-plot(2:max.size, trainScore[2:max.size], type="b", col="red", ylim=c(250,400))
+plot(2:max.size, trainScore[2:max.size], type="b", col="red", ylim=c(250,600))
 points(2:max.size, testScore[2:max.size], type="b", col="blue")
 
 # 4 is very nice thank you sir
 
 finalTree=prune.tree(fit, best=4)
-plot(finalTree)
 # Depth 3 from plot(finalTree)
 Yfit=predict(finalTree, newdata=valid, type = "class")
 table(valid$good_bad,Yfit)
-mcr.tree <- mean(valid$good_bad != Yfit)
+mean(valid$good_bad != Yfit)
 #Variables actually used in tree construction:
 #[1] "savings"  "duration" "history" 
+
 
 fit.bayes=naiveBayes(good_bad~., data=train)
 Yfit.bayes.train=predict(fit.bayes, newdata=train)
 Yfit.bayes.test=predict(fit.bayes, newdata=test)
 table(Yfit.bayes.train, train$good_bad)
 table(Yfit.bayes.test, test$good_bad)
+
+# Tree is a bit better, very nice sir
 
 createROCmatrix <- function(pred, pi.vector){
   tpr.vector = numeric()
@@ -96,6 +99,9 @@ ggplot(data = NULL, aes(col = classifier)) +
   geom_point(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) + 
   geom_line(data = bayes.ROC.matrix, aes(x = fpr.vector, y = tpr.vector, col="Bayes")) 
 
-loss_matrix <- matrix(data = c(0,1,10,0), nrow = 2, ncol = 2)
-bayes.loss.predict <- ifelse(bayes.predict[,2]/bayes.predict[,1] > loss_matrix[3]/loss_matrix[2], "good", "bad")
+bayes.predict.train <- predict(fit.bayes, newdata = train, type = "raw")
+loss = matrix(c(0,1,10,0), nrow = 2, ncol = 2)
+bayes.loss.predict <-ifelse((bayes.predict[,2]/bayes.predict[,1]) > (loss[2,1]/loss[1,2]), "good", "bad" )
+bayes.loss.predict.train <- ifelse(bayes.predict.train[,2]/bayes.predict.train[,1] > loss_matrix[3]/loss_matrix[2], "good", "bad")
 table(test$good_bad, bayes.loss.predict)
+table(train$good_bad, bayes.loss.predict.train)
