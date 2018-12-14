@@ -1,6 +1,7 @@
 library("ggplot2")
 library("fastICA")
 setwd("~/TDDE01/lab2")
+set.seed(12345)
 data <- data.frame(read.csv2("NIRSpectra.csv"))
 data.features <- subset(data, select = -c(Viscosity))
 pca.fit <-prcomp(x = data.features, center = TRUE, scale. = TRUE)
